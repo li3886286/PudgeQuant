@@ -123,8 +123,12 @@ export function registerTools(
     },
     async ({ device_id, intensity, actuator_index }) => {
       try {
-        await safety.vibrate(device_id, intensity, { actuatorIndex: actuator_index });
-        return ok(`Vibrating device ${device_id} at ${pct(intensity)}.`, { device_id, intensity });
+        const effective = await safety.vibrate(device_id, intensity, { actuatorIndex: actuator_index });
+        return ok(driveMsg("Vibrating", device_id, intensity, effective), {
+          device_id,
+          intensity: effective,
+          requested: intensity,
+        });
       } catch (e) {
         return fail(e);
       }
@@ -140,8 +144,12 @@ export function registerTools(
     },
     async ({ device_id, intensity, actuator_index }) => {
       try {
-        await safety.oscillate(device_id, intensity, { actuatorIndex: actuator_index });
-        return ok(`Oscillating device ${device_id} at ${pct(intensity)}.`, { device_id, intensity });
+        const effective = await safety.oscillate(device_id, intensity, { actuatorIndex: actuator_index });
+        return ok(driveMsg("Oscillating", device_id, intensity, effective), {
+          device_id,
+          intensity: effective,
+          requested: intensity,
+        });
       } catch (e) {
         return fail(e);
       }
@@ -162,8 +170,13 @@ export function registerTools(
     },
     async ({ device_id, speed, clockwise, actuator_index }) => {
       try {
-        await safety.rotate(device_id, speed, clockwise ?? true, { actuatorIndex: actuator_index });
-        return ok(`Rotating device ${device_id} at ${pct(speed)}.`, { device_id, speed, clockwise: clockwise ?? true });
+        const effective = await safety.rotate(device_id, speed, clockwise ?? true, { actuatorIndex: actuator_index });
+        return ok(driveMsg("Rotating", device_id, speed, effective), {
+          device_id,
+          speed: effective,
+          requested: speed,
+          clockwise: clockwise ?? true,
+        });
       } catch (e) {
         return fail(e);
       }
@@ -184,10 +197,10 @@ export function registerTools(
     },
     async ({ device_id, position, duration_ms, actuator_index }) => {
       try {
-        await safety.linear(device_id, position, duration_ms, { actuatorIndex: actuator_index });
-        return ok(`Moving device ${device_id} to ${pct(position)} over ${duration_ms}ms.`, {
+        const effective = await safety.linear(device_id, position, duration_ms, { actuatorIndex: actuator_index });
+        return ok(`Moving device ${device_id} to ${pct(effective)} over ${duration_ms}ms.`, {
           device_id,
-          position,
+          position: effective,
           duration_ms,
         });
       } catch (e) {
@@ -269,6 +282,12 @@ export function makeServer(): McpServer {
 }
 
 const pct = (v: number): string => `${Math.round(v * 100)}%`;
+
+/** Human-readable drive message that notes when the request was clamped. */
+const driveMsg = (verb: string, deviceId: number, requested: number, effective: number): string =>
+  effective < requested
+    ? `${verb} device ${deviceId} at ${pct(effective)} (clamped from ${pct(requested)} by MAX_INTENSITY).`
+    : `${verb} device ${deviceId} at ${pct(effective)}.`;
 
 /** Server-side hard bounds for patterns — never trust client schema alone (playbook §4). */
 function enforcePatternBounds(

@@ -70,12 +70,14 @@ export class SafetyLayer {
     private readonly config: TactusConfig,
   ) {}
 
-  async vibrate(deviceId: number, intensity: number, target?: DriveTarget): Promise<void> {
-    await this.driveScalar(deviceId, "vibrate", intensity, target);
+  /** Drive methods return the EFFECTIVE value actually applied (post-clamp), so
+   *  callers can see when a request was clamped — honesty over optimism. */
+  async vibrate(deviceId: number, intensity: number, target?: DriveTarget): Promise<number> {
+    return this.driveScalar(deviceId, "vibrate", intensity, target);
   }
 
-  async oscillate(deviceId: number, intensity: number, target?: DriveTarget): Promise<void> {
-    await this.driveScalar(deviceId, "oscillate", intensity, target);
+  async oscillate(deviceId: number, intensity: number, target?: DriveTarget): Promise<number> {
+    return this.driveScalar(deviceId, "oscillate", intensity, target);
   }
 
   async rotate(
@@ -83,11 +85,12 @@ export class SafetyLayer {
     speed: number,
     clockwise: boolean,
     target?: DriveTarget,
-  ): Promise<void> {
+  ): Promise<number> {
     const v = this.clampIntensity(speed);
     this.cancelPattern(deviceId);
     this.armWatchdog(deviceId);
     await this.submit(deviceId, () => this.controller.rotate(deviceId, v, clockwise, target));
+    return v;
   }
 
   async linear(
@@ -95,11 +98,12 @@ export class SafetyLayer {
     position: number,
     durationMs: number,
     target?: DriveTarget,
-  ): Promise<void> {
+  ): Promise<number> {
     const p = Math.max(0, Math.min(1, position)); // position is a coordinate, not an intensity
     this.cancelPattern(deviceId);
     this.armWatchdog(deviceId);
     await this.submit(deviceId, () => this.controller.linear(deviceId, p, durationMs, target));
+    return p;
   }
 
   /**
@@ -172,11 +176,12 @@ export class SafetyLayer {
     type: ScalarOutput,
     intensity: number,
     target?: DriveTarget,
-  ): Promise<void> {
+  ): Promise<number> {
     const v = this.clampIntensity(intensity);
     this.cancelPattern(deviceId);
     this.armWatchdog(deviceId);
     await this.submit(deviceId, () => this.controller.output(deviceId, type, v, target));
+    return v;
   }
 
   private clampIntensity(v: number): number {
