@@ -1,0 +1,17 @@
+# 本机工作文档 —— 绝不进公开仓库
+CLAUDE.md
+toy-control-mcp-spec.zh.md
+toy-control-mcp-shipping-playbook.zh.md
+
+# npm 凭证
+.npmrc
+
+# 依赖与构建产物
+node_modules/
+dist/
+
+# 环境与系统
+.env
+.env.*
+.DS_Store
+*.log
