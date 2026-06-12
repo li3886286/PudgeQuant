@@ -110,7 +110,7 @@ export class ButtplugController implements DeviceController {
     const device = this.requireDevice(deviceId);
     const outputType = type === "vibrate" ? OutputType.Vibrate : OutputType.Oscillate;
     const ctor = type === "vibrate" ? DeviceOutput.Vibrate : DeviceOutput.Oscillate;
-    await this.runOnFeatures(device, outputType, type, () => ctor.percent(value));
+    await this.runOnFeatures(device, outputType, type, () => ctor.percent(value), target);
   }
 
   async rotate(
@@ -163,7 +163,15 @@ export class ButtplugController implements DeviceController {
     target?: DriveTarget,
   ): Promise<void> {
     const features = this.featuresFor(device, outputType, label, target);
-    await Promise.all(features.map((f) => f.runOutput(build(f))));
+    try {
+      await Promise.all(features.map((f) => f.runOutput(build(f))));
+    } catch (e) {
+      if (e instanceof TactusError) throw e;
+      throw new TactusError(
+        `Device ${device.index} rejected the ${label} command: ${buttplugErrorText(e)}`,
+        "DEVICE_ERROR",
+      );
+    }
   }
 
   private featuresFor(
@@ -192,9 +200,15 @@ export class ButtplugController implements DeviceController {
     const actuators: ActuatorInfo[] = [];
     let hasBattery = false;
     for (const f of device.features.values()) {
+      // A feature can expose several output types that collapse to the same
+      // actuator type (e.g. Position + HwPositionWithDuration → "linear");
+      // emit at most one actuator per type per feature.
+      const seen = new Set<ActuatorType>();
       for (const [outputType, actuatorType] of OUTPUT_TO_ACTUATOR) {
+        if (seen.has(actuatorType)) continue;
         const out = f.output(outputType);
         if (out) {
+          seen.add(actuatorType);
           actuators.push({ index: f.index, type: actuatorType, step_count: out.valueRange[1] });
         }
       }
@@ -222,6 +236,22 @@ export class ButtplugController implements DeviceController {
     }
     return device;
   }
+}
+
+/** Turn a Buttplug error (often a JSON string like
+ *  `{"ButtplugDeviceError":{"MessageNotSupported":"OutputCmd"}}`) into a short
+ *  human-readable phrase. */
+function buttplugErrorText(e: unknown): string {
+  const raw = e instanceof Error ? e.message : String(e);
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const inner = (parsed.ButtplugDeviceError ?? parsed.ButtplugError ?? parsed) as Record<string, unknown>;
+    const [kind, detail] = Object.entries(inner)[0] ?? [];
+    if (kind) return `${kind}: ${typeof detail === "string" ? detail : JSON.stringify(detail)}`;
+  } catch {
+    /* not JSON — fall through */
+  }
+  return raw;
 }
 
 /** Map a 0..1 speed + direction onto a feature's (possibly signed) value range. */
