@@ -1,9 +1,15 @@
 #!/usr/bin/env node
+import { createRequire } from "node:module";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { ButtplugController } from "./buttplug.js";
 import { loadConfig } from "./config.js";
 import { SafetyLayer } from "./safety.js";
 import { makeServer, registerTools } from "./server.js";
+
+// Single source of truth for the version: package.json (sits one level above
+// dist/ at runtime). Avoids hard-coding the version in more than one place.
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json") as { version: string };
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
@@ -14,7 +20,7 @@ async function main(): Promise<void> {
   const config = loadConfig();
   const controller = new ButtplugController(config);
   const safety = new SafetyLayer(controller, config);
-  const server = makeServer();
+  const server = makeServer(version);
   registerTools(server, safety, controller, config);
 
   let shuttingDown = false;

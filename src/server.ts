@@ -4,8 +4,6 @@ import { DeviceController } from "./controller.js";
 import { SafetyLayer, type PatternStep } from "./safety.js";
 import { TactusConfig, TactusError } from "./types.js";
 
-const PKG_VERSION = "0.0.1";
-
 /** Server-level guidance; some clients ignore this, hence the per-tool prefixes too. */
 const INSTRUCTIONS =
   "Tactus is a content-agnostic hardware control layer. It forwards device " +
@@ -277,8 +275,8 @@ export function registerTools(
   );
 }
 
-export function makeServer(): McpServer {
-  return new McpServer({ name: "tactus", version: PKG_VERSION }, { instructions: INSTRUCTIONS });
+export function makeServer(version: string): McpServer {
+  return new McpServer({ name: "tactus", version }, { instructions: INSTRUCTIONS });
 }
 
 const pct = (v: number): string => `${Math.round(v * 100)}%`;

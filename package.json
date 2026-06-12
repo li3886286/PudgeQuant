@@ -1,6 +1,6 @@
 {
   "name": "tactus-mcp",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A content-agnostic MCP server that exposes intimate hardware control to AI agents by wrapping Buttplug/Intiface.",
   "type": "module",
   "bin": {
