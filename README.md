@@ -2,6 +2,9 @@
 
 # Tactus
 
+[![CI](https://github.com/ProjectAILiberation/tactus/actions/workflows/ci.yml/badge.svg)](https://github.com/ProjectAILiberation/tactus/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 **A content-agnostic MCP server that lets any AI agent control intimate hardware through a clean, safe tool interface.**
 
 Tactus is a thin, neutral control layer. It wraps [Buttplug](https://buttplug.io/) /
