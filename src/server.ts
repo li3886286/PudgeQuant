@@ -290,7 +290,7 @@ const driveMsg = (verb: string, deviceId: number, requested: number, effective: 
     : `${verb} device ${deviceId} at ${pct(effective)}.`;
 
 /** Server-side hard bounds for patterns — never trust client schema alone (playbook §4). */
-function enforcePatternBounds(
+export function enforcePatternBounds(
   steps: readonly { duration_ms: number }[],
   repeat: number,
   config: TactusConfig,
