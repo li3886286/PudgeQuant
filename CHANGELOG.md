@@ -5,7 +5,7 @@ All notable changes to this project are documented here. The format is based on
 [Semantic Versioning](https://semver.org/). While the major version is `0`, the
 public tool interface may still change between minor versions.
 
-## [0.1.1] — unreleased
+## [0.1.1] — 2026-06-13
 
 ### Fixed
 - A rate-limited command that was coalesced and then failed on flush (e.g. a
