@@ -31,6 +31,17 @@
   ],
   "author": "ProjectAILiberation",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ProjectAILiberation/tactus.git"
+  },
+  "homepage": "https://github.com/ProjectAILiberation/tactus#readme",
+  "bugs": {
+    "url": "https://github.com/ProjectAILiberation/tactus/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "buttplug": "^5.0.1",
