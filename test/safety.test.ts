@@ -96,6 +96,43 @@ test("rate limiter coalesces a burst to the latest value", async () => {
   assert.equal(calls.at(-1)?.args[2], 0.3, "the latest value is the one flushed");
 });
 
+test("watchdogs fire independently per device", async () => {
+  const fc = new FakeController();
+  const safety = new SafetyLayer(fc, cfg({ maxContinuousMs: 40 }));
+  await safety.vibrate(0, 0.5);
+  await safety.vibrate(1, 0.5);
+  await sleep(90);
+  const stopped = fc.callsTo("stopDevice").map((c) => c.args[0]).sort();
+  assert.deepEqual(stopped, [0, 1], "both devices' watchdogs should have fired");
+});
+
+test("stop_all clears every watchdog so none fire afterward", async () => {
+  const fc = new FakeController();
+  const safety = new SafetyLayer(fc, cfg({ maxContinuousMs: 50 }));
+  await safety.vibrate(0, 0.5);
+  await safety.vibrate(1, 0.5);
+  await safety.stopAll();
+  const stopsAfterStopAll = fc.callsTo("stopDevice").length;
+  await sleep(90);
+  assert.equal(
+    fc.callsTo("stopDevice").length,
+    stopsAfterStopAll,
+    "no watchdog should fire after stop_all cleared them",
+  );
+  assert.ok(fc.callsTo("stopAll").length >= 1);
+});
+
+test("stop_device leaves another device's watchdog running", async () => {
+  const fc = new FakeController();
+  const safety = new SafetyLayer(fc, cfg({ maxContinuousMs: 50 }));
+  await safety.vibrate(0, 0.5);
+  await safety.vibrate(1, 0.5);
+  await safety.stopDevice(0); // explicit stop for device 0 only
+  await sleep(90); // device 1's watchdog should still fire
+  const stoppedIds = fc.callsTo("stopDevice").map((c) => c.args[0]);
+  assert.ok(stoppedIds.includes(1), "device 1's watchdog should still auto-stop it");
+});
+
 test("pattern bounds: rejects too many steps", () => {
   const steps = Array.from({ length: 5 }, () => ({ duration_ms: 10 }));
   assert.throws(() => enforcePatternBounds(steps, 1, cfg({ maxPatternSteps: 3 })), /max is 3/);

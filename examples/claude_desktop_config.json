@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "tactus": {
+      "command": "npx",
+      "args": ["-y", "tactus-mcp"],
+      "env": {
+        "MAX_INTENSITY": "1.0",
+        "MAX_CONTINUOUS_MS": "600000"
+      }
+    }
+  }
+}
