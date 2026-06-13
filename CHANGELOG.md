@@ -5,6 +5,22 @@ All notable changes to this project are documented here. The format is based on
 [Semantic Versioning](https://semver.org/). While the major version is `0`, the
 public tool interface may still change between minor versions.
 
+## [0.1.1] — unreleased
+
+### Fixed
+- A rate-limited command that was coalesced and then failed on flush (e.g. a
+  dropped link) no longer becomes an unhandled rejection that crashes the
+  server; the failure is swallowed and logged to stderr.
+- `server_status` / `status()` is now safe to call while disconnected or
+  mid-reconnect — it previously read `client.devices` unconditionally, which
+  throws when the connector is down.
+
+### Added
+- `npm run e2e`: an end-to-end probe that drives the real controller + safety
+  stack against a live Intiface (capability-adaptive; simulator or real device).
+- Regression tests for the rate-limiter flush error path and for `status()`
+  while disconnected.
+
 ## [0.1.0] — unreleased
 
 First feature-complete development version. Verified against the Intiface device

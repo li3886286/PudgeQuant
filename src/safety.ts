@@ -39,7 +39,18 @@ class RateLimiter {
         this.pending = undefined;
         if (next) {
           this.lastSentAt = Date.now();
-          void next();
+          // Fire-and-forget: the caller already received a resolved promise when
+          // this command was coalesced, so a rejection here cannot propagate back.
+          // Swallow it (logged to stderr) rather than letting it surface as an
+          // unhandled rejection — a dropped trailing command must NEVER crash the
+          // server (safety is the headline feature; playbook §3).
+          void next().catch((e) => {
+            console.error(
+              `[tactus] coalesced command failed after the rate-limit window: ${
+                e instanceof Error ? e.message : String(e)
+              }`,
+            );
+          });
         }
       }, this.minIntervalMs - elapsed);
       this.timer.unref?.();

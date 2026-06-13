@@ -15,5 +15,5 @@
     "sourceMap": true
   },
   "include": ["src/**/*"],
-  "exclude": ["src/m0-smoke.ts"]
+  "exclude": ["src/m0-smoke.ts", "src/e2e-probe.ts"]
 }

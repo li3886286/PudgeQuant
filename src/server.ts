@@ -73,7 +73,13 @@ export function registerTools(
       description: "Report connection status to Intiface and device count.",
       inputSchema: {},
     },
-    async () => ok("Status.", { status: controller.status() }),
+    async () => {
+      try {
+        return ok("Status.", { status: controller.status() });
+      } catch (e) {
+        return fail(e);
+      }
+    },
   );
 
   server.registerTool(

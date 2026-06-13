@@ -96,6 +96,31 @@ test("rate limiter coalesces a burst to the latest value", async () => {
   assert.equal(calls.at(-1)?.args[2], 0.3, "the latest value is the one flushed");
 });
 
+test("a coalesced command that fails is swallowed, not crashed", async () => {
+  // Regression: the rate limiter used to flush its trailing command with a bare
+  // `void next()`, so a coalesced command that rejected (device error, lost
+  // actuator, dropped link) became an unhandled rejection and crashed the whole
+  // server. The flush must swallow the failure instead.
+  const rejections: unknown[] = [];
+  const onRejection = (e: unknown): void => {
+    rejections.push(e);
+  };
+  process.on("unhandledRejection", onRejection);
+  try {
+    const fc = new FakeController();
+    const safety = new SafetyLayer(fc, cfg({ maxCommandsPerSec: 20 })); // 50ms window
+    await safety.vibrate(0, 0.1); // sent immediately, succeeds, opens the window
+    fc.failOutput = true; // the next actual send will reject
+    await safety.vibrate(0, 0.2); // coalesced — resolves to the caller right away
+    await safety.vibrate(0, 0.3); // coalesced; this is what the window flushes
+    await sleep(90); // window opens, flush fires next() which now rejects
+    assert.equal(rejections.length, 0, "coalesced failure must not become an unhandled rejection");
+    assert.ok(fc.callsTo("output").length >= 2, "the trailing command was actually attempted");
+  } finally {
+    process.off("unhandledRejection", onRejection);
+  }
+});
+
 test("watchdogs fire independently per device", async () => {
   const fc = new FakeController();
   const safety = new SafetyLayer(fc, cfg({ maxContinuousMs: 40 }));

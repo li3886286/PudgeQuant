@@ -48,8 +48,13 @@ export class FakeController implements DeviceController {
   async getBattery(): Promise<number> {
     return 1;
   }
+  /** When true, output() rejects — exercises the rate limiter's flush error path
+   *  (a coalesced command that fails must not crash the process). */
+  failOutput = false;
+
   async output(deviceId: number, type: ScalarOutput, value: number, target?: DriveTarget): Promise<void> {
     this.record("output", deviceId, type, value, target);
+    if (this.failOutput) throw new Error("simulated output failure");
   }
   async rotate(deviceId: number, speed: number, clockwise: boolean, target?: DriveTarget): Promise<void> {
     this.record("rotate", deviceId, speed, clockwise, target);

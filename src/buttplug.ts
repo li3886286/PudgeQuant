@@ -77,11 +77,15 @@ export class ButtplugController implements DeviceController {
   }
 
   status(): ServerStatus {
+    const connected = this.client.connected;
     return {
-      connected: this.client.connected,
+      connected,
       intiface_url: this.config.intifaceUrl,
       server_name: this.serverName,
-      device_count: this.client.devices.size,
+      // `client.devices` throws when the connector is down, so only read it while
+      // connected. status() must be safe to call in ANY state — especially during
+      // a reconnect, which is exactly when a caller most wants to know the state.
+      device_count: connected ? this.client.devices.size : 0,
     };
   }
 
