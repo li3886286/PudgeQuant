@@ -1,0 +1,75 @@
+name: Unsupported device
+description: A device from a supported brand that Tactus / Buttplug doesn't recognize
+title: "[Device] <brand> <model> not recognized"
+labels: ["device-support"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tactus wraps **Buttplug**, so device coverage comes from Buttplug's device
+        configuration — Tactus adds no per-device code. Often a device from a
+        supported brand simply advertises a Bluetooth name (or regional SKU) that
+        Buttplug hasn't catalogued yet. Those cases can usually be fixed by adding
+        the **name** upstream in Buttplug — no reverse-engineering involved.
+
+        Please fill this in so we can tell whether your device just needs a name
+        added upstream, or uses a protocol that isn't supported.
+  - type: input
+    id: brand
+    attributes:
+      label: Brand
+      placeholder: e.g. Svakom
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model / SKU (from the packaging)
+      placeholder: e.g. SX589A
+  - type: input
+    id: ble-name
+    attributes:
+      label: Advertised Bluetooth name
+      description: >
+        The name your computer/phone shows when scanning for it (often a SKU-like
+        code). On macOS: System Settings → Bluetooth → "Nearby devices". On
+        Chrome: chrome://bluetooth-internals → Start Scan.
+      placeholder: e.g. SX589A
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: Which app normally controls it?
+      placeholder: e.g. the brand's official Bluetooth app
+  - type: dropdown
+    id: self-test
+    attributes:
+      label: Did you try aliasing it to an existing protocol for this brand?
+      description: See "Adding support for an unrecognized device" in the README.
+      options:
+        - "I haven't tested"
+        - "It WORKS when aliased to an existing same-brand protocol"
+        - "It connects but does not actuate (wrong protocol)"
+        - "It does not connect at all"
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: OS and Intiface Central version
+      placeholder: e.g. macOS 15.5, Intiface Central 3.1.0
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: e.g. which existing protocol it matched, advertised service UUIDs, behavior.
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Please confirm
+      options:
+        - label: I understand Tactus does not reverse-engineer devices or break encryption; only protocols already supported upstream by Buttplug are used.
+          required: true
+        - label: I own this device and am an adult in my jurisdiction.
+          required: true

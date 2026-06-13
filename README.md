@@ -155,6 +155,25 @@ The device disconnected (e.g. out of range) and left the known set. Call
 - **Local only.** This package controls devices on the same machine via a local
   Intiface. Internet/remote control is out of scope here.
 
+## Adding support for an unrecognized device
+
+Using a device from a supported brand that doesn't show up? It often just
+advertises a Bluetooth name (or regional SKU) that Buttplug hasn't catalogued
+yet. Because Tactus wraps Buttplug, the fix belongs **upstream in Buttplug**, not
+here — and for a same-brand device it's usually just adding a **name**, with no
+reverse-engineering.
+
+1. Find the device's advertised Bluetooth name (see Troubleshooting above).
+2. In Intiface's user device configuration, add that name to the same brand's
+   existing protocol and test whether it drives correctly.
+3. If it works, contribute the name upstream to
+   [buttplugio/buttplug](https://github.com/buttplugio/buttplug) so everyone
+   benefits — and/or open an **"Unsupported device"** issue here and we'll help.
+
+If a device only works under a protocol it doesn't truly match — or needs a
+protocol Buttplug doesn't have — that would require reverse-engineering, which is
+out of scope (see [CONTRIBUTING](CONTRIBUTING.md)).
+
 ---
 
 ## Trademarks
