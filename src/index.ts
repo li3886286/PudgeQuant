@@ -49,6 +49,12 @@ async function main(): Promise<void> {
     void connectLoop();
   });
 
+  controller.onDeviceAdded((id, name) => log(`device connected: [${id}] ${name}`));
+  controller.onDeviceRemoved((id, name) => {
+    log(`device disconnected: [${id}] ${name} — clearing its safety timers`);
+    safety.forgetDevice(id);
+  });
+
   // Stop everything if the AI client disconnects (transport close).
   server.server.onclose = (): void => {
     void safety.shutdown();

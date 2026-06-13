@@ -35,4 +35,10 @@ export interface DeviceController {
 
   /** Register a callback fired when the transport to Intiface drops. */
   onDisconnect(cb: () => void): void;
+
+  /** Fired when Intiface reports a device connected (e.g. found by a scan). */
+  onDeviceAdded(cb: (id: number, name: string) => void): void;
+
+  /** Fired when Intiface reports a device dropped (e.g. BLE link lost / out of range). */
+  onDeviceRemoved(cb: (id: number, name: string) => void): void;
 }

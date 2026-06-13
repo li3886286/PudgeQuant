@@ -133,6 +133,15 @@ test("stop_device leaves another device's watchdog running", async () => {
   assert.ok(stoppedIds.includes(1), "device 1's watchdog should still auto-stop it");
 });
 
+test("forgetDevice cancels a disconnected device's watchdog", async () => {
+  const fc = new FakeController();
+  const safety = new SafetyLayer(fc, cfg({ maxContinuousMs: 40 }));
+  await safety.vibrate(0, 0.5);
+  safety.forgetDevice(0); // device dropped (e.g. out of range)
+  await sleep(80);
+  assert.equal(fc.callsTo("stopDevice").length, 0, "no watchdog should fire for a forgotten device");
+});
+
 test("pattern bounds: rejects too many steps", () => {
   const steps = Array.from({ length: 5 }, () => ({ duration_ms: 10 }));
   assert.throws(() => enforcePatternBounds(steps, 1, cfg({ maxPatternSteps: 3 })), /max is 3/);

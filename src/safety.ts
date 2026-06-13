@@ -158,6 +158,18 @@ export class SafetyLayer {
     await this.retry(() => this.controller.stopAll());
   }
 
+  /** Drop all per-device state for a device that has disconnected. No point
+   *  keeping a watchdog/pattern/limiter alive for a device that is gone. */
+  forgetDevice(deviceId: number): void {
+    this.clearWatchdog(deviceId);
+    this.cancelPattern(deviceId);
+    const limiter = this.limiters.get(deviceId);
+    if (limiter) {
+      limiter.dispose();
+      this.limiters.delete(deviceId);
+    }
+  }
+
   /** Best-effort emergency stop for shutdown paths; never throws. */
   async shutdown(): Promise<void> {
     for (const l of this.limiters.values()) l.dispose();

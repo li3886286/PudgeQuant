@@ -38,11 +38,19 @@ export class ButtplugController implements DeviceController {
   private readonly client: ButtplugClient;
   private serverName?: string;
   private readonly disconnectCbs: Array<() => void> = [];
+  private readonly deviceRemovedCbs: Array<(id: number, name: string) => void> = [];
+  private readonly deviceAddedCbs: Array<(id: number, name: string) => void> = [];
 
   constructor(private readonly config: TactusConfig) {
     this.client = new ButtplugClient("Tactus");
     this.client.on("disconnect", () => {
       for (const cb of this.disconnectCbs) cb();
+    });
+    this.client.on("deviceadded", (d: ButtplugClientDevice) => {
+      for (const cb of this.deviceAddedCbs) cb(d.index, d.name);
+    });
+    this.client.on("deviceremoved", (d: ButtplugClientDevice) => {
+      for (const cb of this.deviceRemovedCbs) cb(d.index, d.name);
     });
   }
 
@@ -150,6 +158,14 @@ export class ButtplugController implements DeviceController {
 
   onDisconnect(cb: () => void): void {
     this.disconnectCbs.push(cb);
+  }
+
+  onDeviceAdded(cb: (id: number, name: string) => void): void {
+    this.deviceAddedCbs.push(cb);
+  }
+
+  onDeviceRemoved(cb: (id: number, name: string) => void): void {
+    this.deviceRemovedCbs.push(cb);
   }
 
   // --- internals ---

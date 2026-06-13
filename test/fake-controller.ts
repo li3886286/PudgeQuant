@@ -69,4 +69,10 @@ export class FakeController implements DeviceController {
   onDisconnect(): void {
     /* no-op for tests */
   }
+  onDeviceAdded(): void {
+    /* no-op for tests */
+  }
+  onDeviceRemoved(): void {
+    /* no-op for tests */
+  }
 }

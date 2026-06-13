@@ -21,6 +21,10 @@ simulator and at least one real device.
 - Server-side hard validation of pattern bounds and out-of-range input.
 - Robust Intiface connection with exponential-backoff reconnect; the server never
   crashes when Intiface is unavailable and returns clear, actionable errors.
+- Reacts to a device dropping (BLE link lost / out of range): logs the
+  disconnect and clears that device's safety timers so no watchdog fires for a
+  device that is gone. (Note: silent BLE degradation that Intiface does not
+  detect is not yet actively probed — see known limitations.)
 - Configuration via `INTIFACE_URL`, `MAX_INTENSITY`, `MAX_CONTINUOUS_MS`,
   `SCAN_DEFAULT_MS`, and a gated `--allow-unsafe` override.
 - Apache-2.0 license, compliance/trademark/acceptable-use documentation, unit
