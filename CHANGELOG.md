@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format is based on
 [Semantic Versioning](https://semver.org/). While the major version is `0`, the
 public tool interface may still change between minor versions.
 
+## [0.1.2] — 2026-06-13
+
+### Added
+- `mcpName` field in `package.json` so the MCP Registry can verify npm package
+  ownership. (npm verification reads `mcpName`; the README `mcp-name` marker only
+  applies to PyPI/NuGet packages.)
+
 ## [0.1.1] — 2026-06-13
 
 ### Fixed
