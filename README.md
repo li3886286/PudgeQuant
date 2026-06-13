@@ -116,6 +116,45 @@ The safety layer wraps every driving command and is on by default:
 | `SCAN_DEFAULT_MS` | `5000` | Default scan duration |
 | `--allow-unsafe` | _off_ | Disables the intensity clamp (discouraged) |
 
+## Troubleshooting
+
+**"Intiface is not reachable at ws://127.0.0.1:12345"**
+Start Intiface Central and click **Start Server** (the top status should read
+"Engine running"). Tactus retries automatically with backoff, so once Intiface
+is up the tools start working without restarting your MCP client.
+
+**A device doesn't show up when scanning**
+- Make sure it is powered on and awake (press a button to wake it), and **not
+  already connected to its own phone app** — Bluetooth devices accept one host at
+  a time, so close/disconnect the app first.
+- On macOS, Intiface needs Bluetooth permission: **System Settings → Privacy &
+  Security → Bluetooth → enable Intiface Central**, then quit and reopen Intiface
+  (the permission only takes effect after a restart).
+- Keep the device in range; out-of-range devices drop and disappear from
+  `list_devices`.
+
+**My computer sees the device over Bluetooth, but Intiface/Tactus doesn't**
+The device's advertised Bluetooth name isn't in Buttplug's supported device
+list (common for regional/rebranded SKUs). Support must be added **upstream in
+[Buttplug](https://github.com/buttplugio/buttplug)** — Tactus deliberately adds
+no per-device code and does not reverse-engineer devices.
+
+**A command returns "Unknown device id"**
+The device disconnected (e.g. out of range) and left the known set. Call
+`scan_for_devices` / `list_devices` to reconnect and get its current id.
+
+## Known limitations
+
+- **Device coverage = whatever Buttplug supports.** Devices not present in
+  Buttplug's device configuration cannot be controlled until added upstream.
+- **Silent link degradation is not actively detected.** A dropped link that
+  Intiface reports is handled (the device leaves `list_devices` and drive calls
+  error clearly). But if a Bluetooth link degrades silently *without* Intiface
+  noticing, commands may appear to succeed while the device is unresponsive —
+  active liveness probing is not yet implemented.
+- **Local only.** This package controls devices on the same machine via a local
+  Intiface. Internet/remote control is out of scope here.
+
 ---
 
 ## Trademarks
